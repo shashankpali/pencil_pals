@@ -55,9 +55,7 @@ async function WorksheetPage({ spec }) {
 
         <aside className="image-panel">
           <div className="image-label">{spec.imagePrompt}</div>
-          <div className="image-placeholder" aria-label="Drawing area">
-            {spec.imageKey ?? ""}
-          </div>
+          <div className="image-placeholder" aria-label="Drawing area" />
         </aside>
       </header>
 

@@ -28,11 +28,6 @@ function getCharacterType(char) {
   return "unknown";
 }
 
-function getImageKey(char) {
-  const defaults = { A: "apple", a: "apple", "5": "stars" };
-  return defaults[char] ?? null;
-}
-
 function getRuling(char) {
   if (/^[0-9]$/.test(char)) return "number";
   if (/^[A-Z]$/.test(char)) return "uppercase";
@@ -47,8 +42,7 @@ export function buildWorksheetSpec(char) {
     type: getCharacterType(char),
     heroTitle: `Practice writing ${char}`,
     heroSubtitle: "Trace each row from top to bottom.",
-    imageKey: getImageKey(char),
-    imagePrompt: `${char} is for… draw & color!`,
+    imagePrompt: "Draw & color",
     ruling: getRuling(char),
     rows: PRACTICE_ROWS
   };

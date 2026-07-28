@@ -86,7 +86,7 @@ function renderWorksheetHtml(spec) {
         </div>
         <div class="image-box">
           <div class="image-title">${escapeHtml(spec.imagePrompt)}</div>
-          <div class="image-placeholder">${escapeHtml(spec.imageKey ?? "image")}</div>
+          <div class="image-placeholder" aria-hidden="true"></div>
         </div>
       </section>
       ${practiceRows}
