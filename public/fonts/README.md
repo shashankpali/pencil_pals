@@ -1,39 +1,42 @@
-# Hero arrow font (custom)
+# Fonts
 
-Stroke-order arrows for the **hero panel only** — uppercase **A–Z** and digits **0–9** (36 glyphs).
+## Practice font — CF Second Son School
 
-Practice rows keep using Print Bold / Print Dashed from CDN.
+File: `second-son-school.ttf`  
+Source: [DaFont — CF Second Son School](https://www.dafont.com/cf-second-son-school.font) by Cloutierfontes
 
-## How to add
+**License:** Free for **personal / non-profit** use only.  
+Commercial / for-profit use requires buying the commercial version from the author:  
+https://www.cloutierfontes.ca/second-son-school.html
 
-When the font is ready, place it here:
+Pencil Pals currently uses this under personal/free use. Do not ship a commercial product with this PERSONAL file without a commercial license.
+
+Solid and trace (“dotted”) cells use the **same** glyph; trace cells are shown translucent in CSS.
+
+### Built-in guide lines
+
+Glyphs include midline + baseline bands. Worksheet CSS matches them via:
+
+| Guide | CSS var | Position | Style |
+|-------|---------|----------|-------|
+| Cap / top | `--guide-top` | 25.2% | dashed |
+| Mid | `--guide-mid` | 43.2% | solid |
+| Baseline | `--guide-base` | 91.3% | solid |
+
+`npm run measure-fonts` locks letter placement to those mid/base positions.
+
+## Hero arrow font (custom, optional)
+
+Stroke-order arrows for the **hero panel only** — uppercase **A–Z** and digits **0–9**.
+
+When ready, place:
 
 `public/fonts/hero-arrows.woff`
 
-The app will load it automatically for the hero demo letter. No extra code changes needed.
+The app loads it automatically for the hero demo letter.
 
-## Design rules
+## Remeasure after changing fonts
 
-| Line | Y position | Style |
-|------|------------|--------|
-| Top | ~8 | solid (drawn in worksheet CSS, not in glyph) |
-| Mid | 50 | dashed (worksheet CSS) |
-| Baseline | 92 | solid (worksheet CSS) |
-
-Each glyph should include:
-
-- Letter shape (match Print Bold proportions)
-- Numbered stroke arrows baked into the glyph art
-
-## Suggested build order
-
-1. **H** — template (3 strokes)
-2. **E, F, L, T, I** — mostly straight strokes
-3. **O, C, D, G, Q** — curves
-4. **A, B, K, M, N, P, R, S, U, V, W, X, Y, Z**
-5. **0–9**
-
-## Tools
-
-- [FontForge](https://fontforge.org/) (free)
-- [Inkscape](https://inkscape.org/) — draw and export paths
+```bash
+npm run measure-fonts
+```
