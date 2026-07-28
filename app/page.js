@@ -1,10 +1,6 @@
-import { parseWorksheetParams } from "@/lib/params.js";
-
 const EXAMPLE_TEXT = "ABCD1234";
 
-export default async function HomePage({ searchParams }) {
-  const { text, includeLowercase } = parseWorksheetParams(await searchParams);
-
+export default function HomePage() {
   return (
     <main className="landing">
       <section className="card">
@@ -15,20 +11,20 @@ export default async function HomePage({ searchParams }) {
           Screen-free — kids learn on paper.
         </p>
 
-        <form action="/preview" method="get" className="generator-form">
+        <form action="preview" method="get" className="generator-form">
           <label className="field">
             <span>Letters / numbers</span>
             <input
               type="text"
               name="text"
-              defaultValue={text || EXAMPLE_TEXT}
+              defaultValue={EXAMPLE_TEXT}
               placeholder={EXAMPLE_TEXT}
               autoComplete="off"
             />
           </label>
 
           <label className="checkbox">
-            <input type="checkbox" name="lowercase" defaultChecked={includeLowercase} value="1" />
+            <input type="checkbox" name="lowercase" defaultChecked value="1" />
             <span>Include lowercase versions for letters</span>
           </label>
 

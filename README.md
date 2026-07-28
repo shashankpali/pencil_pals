@@ -13,14 +13,36 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+**Live demo:** [https://shashankpali.github.io/pencil_pals/](https://shashankpali.github.io/pencil_pals/)
+
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start development server |
-| `npm run build` | Production build |
+| `npm run build` | Production build (local) |
+| `npm run build:pages` | Static export for GitHub Pages |
 | `npm run generate` | Write static HTML worksheets to `output/` |
 | `npm run measure-fonts` | Regenerate `src/lib/letterMetrics.json` from CDN fonts |
+
+## GitHub Pages
+
+The site deploys automatically from `main` via GitHub Actions (`.github/workflows/deploy.yml`).
+
+**One-time setup in your repo settings:**
+
+1. Go to **Settings → Pages**
+2. Set **Source** to **GitHub Actions**
+3. Merge to `main` — the workflow builds `out/` and publishes it
+
+Local Pages preview:
+
+```bash
+npm run build:pages
+npx serve out
+```
+
+Then open `http://localhost:3000/pencil_pals/` (use the `/pencil_pals/` path to match production).
 
 ## Tech stack
 

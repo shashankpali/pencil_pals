@@ -9,6 +9,13 @@ export function parseWorksheetParams(searchParams) {
   return { text, includeLowercase };
 }
 
+export function parseWorksheetSearchParams(searchParams) {
+  const text = searchParams.get("text") ?? "ABCD1234";
+  const includeLowercase = searchParams.get("lowercase") !== "0";
+
+  return { text, includeLowercase };
+}
+
 export function worksheetBackParams({ text, includeLowercase }) {
   return new URLSearchParams({ text, lowercase: includeLowercase ? "1" : "0" });
 }

@@ -1,29 +1,39 @@
-import fs from "node:fs";
-import path from "node:path";
-
 import { parse as parseFont } from "opentype.js/dist/opentype.mjs";
 
-import { FONT_URLS, HERO_ARROW_FONT } from "./fonts.js";
+import { FONT_URLS } from "./fonts.js";
 import metrics from "./letterMetrics.json" with { type: "json" };
 
 const DEFAULT_PLACEMENT = { x: 50, y: 92, fontSize: 84 };
-const HERO_ARROW_FONT_FILE = path.join(process.cwd(), HERO_ARROW_FONT);
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 let fontsPromise;
 let heroArrowFont;
+let heroArrowFontPromise;
 
-function loadHeroArrowFont() {
+async function loadHeroArrowFont() {
   if (heroArrowFont !== undefined) {
     return heroArrowFont;
   }
 
-  try {
-    heroArrowFont = parseFont(fs.readFileSync(HERO_ARROW_FONT_FILE));
-  } catch {
-    heroArrowFont = null;
+  if (!heroArrowFontPromise) {
+    heroArrowFontPromise = (async () => {
+      try {
+        const response = await fetch(`${BASE_PATH}/fonts/hero-arrows.woff`);
+
+        if (!response.ok) {
+          throw new Error("Hero arrow font not found");
+        }
+
+        heroArrowFont = parseFont(await response.arrayBuffer());
+      } catch {
+        heroArrowFont = null;
+      }
+
+      return heroArrowFont;
+    })();
   }
 
-  return heroArrowFont;
+  return heroArrowFontPromise;
 }
 
 async function loadFonts() {
@@ -54,7 +64,7 @@ export async function getLetterPath(char, kind) {
 }
 
 export async function getHeroLetterPath(char) {
-  const arrowFont = loadHeroArrowFont();
+  const arrowFont = await loadHeroArrowFont();
   const placement = getPlacement(char, "solid");
 
   if (arrowFont) {
