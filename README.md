@@ -51,7 +51,7 @@ Then open `http://localhost:3000/pencil_pals/` (use the `/pencil_pals/` path to 
 | App | Next.js 16 (App Router), React 19 |
 | Language | JavaScript (ESM) |
 | Layout | CSS with mm-based A4 sizing, `@media print` |
-| Letter rendering | opentype.js → SVG paths (Print Bold / Print Dashed) |
+| Letter rendering | opentype.js → SVG paths (CF Second Son School; translucent for tracing) |
 | Hero arrows (future) | Custom `public/fonts/hero-arrows.woff` |
 
 Shared logic lives in `src/lib/` and is imported via `@/lib/*`.
@@ -69,8 +69,8 @@ data/          Future per-character metadata
 
 ## How it works
 
-1. User enters text (e.g. `AB12`) and chooses whether to include lowercase.
-2. Input expands to supported characters: `A, a, B, b, 1, 2`.
+1. User enters text (e.g. `AB12` or `AaBb`).
+2. Input expands to supported characters as typed: `A, B, 1, 2` or `A, a, B, b`.
 3. Each character gets one A4 worksheet spec with a hero letter and 10 practice rows.
 4. Preview renders SVG letter paths; print uses the browser's save-as-PDF.
 
@@ -80,13 +80,16 @@ Each sheet has:
 
 - **Hero panel** — large demo letter (stroke arrows come from custom font when added)
 - **Image panel** — draw & color prompt
-- **10 practice rows** — solid → dotted → blank, fading support row by row
+- **10 practice rows** — solid → translucent fade → blank
 
 | Row | Height | Items | Pattern |
 |-----|--------|-------|---------|
-| 1 | 18 mm | 6 | 2 solid, 4 dotted |
-| 2 | 16 mm | 7 | 1 solid, 6 dotted |
-| 3–10 | 15 mm | 8 | dotted count fades (8 → 1), rest blank |
+| 1 | 18 mm | 6 | 2 solid, 4 translucent (0.35) |
+| 2 | 16 mm | 7 | 1 solid, 6 translucent (0.35) |
+| 3 | 15 mm | 8 | 8 translucent (0.35) |
+| 4 | 15 mm | 8 | fade `0.35 → 0.00` |
+| 5 | 15 mm | 8 | fade `0.30 → 0.00`, then 1 blank |
+| 6–10 | 15 mm | 8 | continue ladder, rest blank |
 
 ## Product direction
 
@@ -108,12 +111,12 @@ Each sheet has:
 |------|---------|
 | Input form + preview | PDF/PNG export (Playwright) |
 | A4 print layout | Per-character JSON in `data/characters/` |
-| Uppercase/lowercase expansion | Hero arrow font |
+| Typed letter/number sheets | Hero arrow font |
 | SVG letter rendering | Themed packs, words, cursive |
 
 ## Hero arrow font
 
-When ready, add `public/fonts/hero-arrows.woff` — the app loads it automatically for the hero demo letter. See `public/fonts/README.md` for glyph design rules.
+When ready, add `public/fonts/hero-arrows.woff` — the app loads it automatically for the hero demo letter. See `public/fonts/README.md` for glyph design rules and the practice-font license note.
 
 ## Roadmap
 

@@ -7,7 +7,7 @@ export default function HomePage() {
         <p className="eyebrow">Pencil Pals</p>
         <h1>Printable handwriting worksheets for kids.</h1>
         <p className="intro">
-          Enter letters or numbers, pick your options, and print calm A4 practice sheets.
+          Enter letters or numbers and print calm A4 practice sheets.
           Screen-free — kids learn on paper.
         </p>
 
@@ -23,18 +23,13 @@ export default function HomePage() {
             />
           </label>
 
-          <label className="checkbox">
-            <input type="checkbox" name="lowercase" defaultChecked value="1" />
-            <span>Include lowercase versions for letters</span>
-          </label>
-
           <div className="actions">
             <button type="submit">Generate Worksheet</button>
           </div>
         </form>
 
         <div className="notes">
-          <p>Example: entering <code>AB12</code> generates sheets for A, a, B, b, 1, and 2.</p>
+          <p>Example: entering <code>AB12</code> generates sheets for A, B, 1, and 2. Type lowercase letters if you want those sheets too.</p>
         </div>
       </section>
     </main>

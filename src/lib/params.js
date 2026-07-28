@@ -4,18 +4,14 @@ export function getQueryValue(value) {
 
 export function parseWorksheetParams(searchParams) {
   const text = getQueryValue(searchParams?.text) ?? "ABCD1234";
-  const includeLowercase = getQueryValue(searchParams?.lowercase) !== "0";
-
-  return { text, includeLowercase };
+  return { text };
 }
 
 export function parseWorksheetSearchParams(searchParams) {
   const text = searchParams.get("text") ?? "ABCD1234";
-  const includeLowercase = searchParams.get("lowercase") !== "0";
-
-  return { text, includeLowercase };
+  return { text };
 }
 
-export function worksheetBackParams({ text, includeLowercase }) {
-  return new URLSearchParams({ text, lowercase: includeLowercase ? "1" : "0" });
+export function worksheetBackParams({ text }) {
+  return new URLSearchParams({ text });
 }

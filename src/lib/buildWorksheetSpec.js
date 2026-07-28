@@ -1,28 +1,52 @@
+const ITEMS = 8;
+
+/** Rows 1–3 translucent ink; also row 4’s first cell (continues from row 3’s last). */
+const TRACE_OPACITY = 0.45;
+
+/** Rows 4–10: start at TRACE_OPACITY → 0; each later row drops the leading step. */
+const FADE_LADDER = Array.from({ length: ITEMS }, (_, i) =>
+  +((TRACE_OPACITY * (1 - i / (ITEMS - 1))).toFixed(2))
+);
+
 const ROW_DEFS = [
   { id: "practice-1", heightMm: 18, items: 6, solid: 2, dotted: 4 },
   { id: "practice-2", heightMm: 16, items: 7, solid: 1, dotted: 6 },
-  ...Array.from({ length: 8 }, (_, index) => ({
-    id: `practice-${index + 3}`,
+  { id: "practice-3", heightMm: 15, items: 8, solid: 0, dotted: 8 },
+  ...Array.from({ length: 7 }, (_, index) => ({
+    id: `practice-${index + 4}`,
     heightMm: 15,
-    items: 8,
-    dotted: 8 - index
+    items: ITEMS,
+    fadeFrom: index
   }))
 ];
 
-function practicePattern(items, solid, dotted) {
+function slot(kind, opacity) {
+  return opacity == null ? { kind } : { kind, opacity };
+}
+
+function practicePattern({ items, solid = 0, dotted = 0, fadeFrom }) {
+  if (fadeFrom != null) {
+    const opacities = FADE_LADDER.slice(fadeFrom);
+    const blank = items - opacities.length;
+    return [
+      ...opacities.map((opacity) => slot("dotted", opacity)),
+      ...Array.from({ length: blank }, () => slot("blank"))
+    ];
+  }
+
   const blank = items - solid - dotted;
   return [
-    ...Array(solid).fill("solid"),
-    ...Array(dotted).fill("dotted"),
-    ...Array(blank).fill("blank")
+    ...Array.from({ length: solid }, () => slot("solid", 1)),
+    ...Array.from({ length: dotted }, () => slot("dotted", TRACE_OPACITY)),
+    ...Array.from({ length: blank }, () => slot("blank"))
   ];
 }
 
-const PRACTICE_ROWS = ROW_DEFS.map(({ id, heightMm, items, solid = 0, dotted }) => ({
-  id,
-  heightMm,
-  items,
-  pattern: practicePattern(items, solid, dotted)
+const PRACTICE_ROWS = ROW_DEFS.map((def) => ({
+  id: def.id,
+  heightMm: def.heightMm,
+  items: def.items,
+  pattern: practicePattern(def)
 }));
 
 function getCharacterType(char) {

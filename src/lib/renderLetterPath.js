@@ -1,14 +1,34 @@
 import { parse as parseFont } from "opentype.js/dist/opentype.mjs";
 
-import { FONT_URLS } from "./fonts.js";
+import { HERO_ARROW_FONT, PRACTICE_FONT } from "./fonts.js";
 import metrics from "./letterMetrics.json" with { type: "json" };
 
 const DEFAULT_PLACEMENT = { x: 50, y: 92, fontSize: 84 };
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-let fontsPromise;
+let practiceFontPromise;
 let heroArrowFont;
 let heroArrowFontPromise;
+
+function fontUrl(relativePath) {
+  return `${BASE_PATH}/${relativePath}`;
+}
+
+async function loadPracticeFont() {
+  if (!practiceFontPromise) {
+    practiceFontPromise = (async () => {
+      const response = await fetch(fontUrl(PRACTICE_FONT));
+
+      if (!response.ok) {
+        throw new Error(`Failed to load practice font (${response.status})`);
+      }
+
+      return parseFont(await response.arrayBuffer());
+    })();
+  }
+
+  return practiceFontPromise;
+}
 
 async function loadHeroArrowFont() {
   if (heroArrowFont !== undefined) {
@@ -18,7 +38,7 @@ async function loadHeroArrowFont() {
   if (!heroArrowFontPromise) {
     heroArrowFontPromise = (async () => {
       try {
-        const response = await fetch(`${BASE_PATH}/fonts/hero-arrows.woff`);
+        const response = await fetch(fontUrl(HERO_ARROW_FONT));
 
         if (!response.ok) {
           throw new Error("Hero arrow font not found");
@@ -36,54 +56,36 @@ async function loadHeroArrowFont() {
   return heroArrowFontPromise;
 }
 
-async function loadFonts() {
-  if (!fontsPromise) {
-    fontsPromise = Promise.all(
-      Object.entries(FONT_URLS).map(async ([key, url]) => {
-        const response = await fetch(url);
-        return [key, parseFont(await response.arrayBuffer())];
-      })
-    ).then(Object.fromEntries);
-  }
-
-  return fontsPromise;
-}
-
-function getPlacement(char, kind) {
-  const style = kind === "solid" ? "solid" : "dashed";
-  return metrics[style]?.[char] ?? DEFAULT_PLACEMENT;
+function getPlacement(char) {
+  return metrics[char] ?? DEFAULT_PLACEMENT;
 }
 
 function toPathData(font, char, placement) {
   return font.getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2);
 }
 
-export async function getLetterPath(char, kind) {
-  const fonts = await loadFonts();
-  return toPathData(fonts[kind === "solid" ? "solid" : "dashed"], char, getPlacement(char, kind));
+export async function getLetterPath(char) {
+  const font = await loadPracticeFont();
+  return toPathData(font, char, getPlacement(char));
 }
 
 export async function getHeroLetterPath(char) {
   const arrowFont = await loadHeroArrowFont();
-  const placement = getPlacement(char, "solid");
+  const placement = getPlacement(char);
 
   if (arrowFont) {
     return { pathData: toPathData(arrowFont, char, placement) };
   }
 
-  return { pathData: await getLetterPath(char, "solid") };
+  return { pathData: await getLetterPath(char) };
 }
 
 export async function loadWorksheetPaths(char) {
-  const [hero, solid, dotted] = await Promise.all([
-    getHeroLetterPath(char),
-    getLetterPath(char, "solid"),
-    getLetterPath(char, "dotted")
-  ]);
+  const [hero, letter] = await Promise.all([getHeroLetterPath(char), getLetterPath(char)]);
 
   return {
     hero: hero.pathData,
-    solid,
-    dotted
+    solid: letter,
+    dotted: letter
   };
 }

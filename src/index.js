@@ -6,7 +6,7 @@ import { buildWorksheetBatch } from "./lib/worksheets.js";
 const outputDir = new URL("../output/", import.meta.url);
 
 function parseArgs(argv) {
-  const args = { text: "A5", includeLowercase: true, unique: true };
+  const args = { text: "A5", unique: true };
 
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
@@ -15,10 +15,6 @@ function parseArgs(argv) {
       args.text = argv[i + 1];
       i += 1;
       continue;
-    }
-
-    if (token === "--no-small-case") {
-      args.includeLowercase = false;
     }
 
     if (token === "--keep-duplicates") {
@@ -37,7 +33,10 @@ function renderWorksheetHtml(spec) {
   const practiceRows = spec.rows
     .map((row) => {
       const slots = row.pattern
-        .map((kind) => `<span class="slot slot-${kind}">${kind === "blank" ? "&nbsp;" : escapeHtml(spec.char)}</span>`)
+        .map((cell) => {
+          const kind = typeof cell === "string" ? cell : cell.kind;
+          return `<span class="slot slot-${kind}">${kind === "blank" ? "&nbsp;" : escapeHtml(spec.char)}</span>`;
+        })
         .join("");
 
       return `
@@ -99,7 +98,6 @@ function renderWorksheetHtml(spec) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const { chars, specs } = buildWorksheetBatch(args.text, {
-    includeLowercase: args.includeLowercase,
     unique: args.unique
   });
 

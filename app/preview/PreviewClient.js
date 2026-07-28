@@ -11,13 +11,21 @@ import { HeroLetter } from "../ui/HeroLetter.js";
 import { LetterGlyph } from "../ui/LetterGlyph.js";
 import { PrintButton } from "../ui/PrintButton.js";
 
-function Slot({ kind, paths }) {
+function Slot({ kind, opacity, paths }) {
   const pathData = kind === "blank" ? null : paths[kind];
 
   return (
     <div className={`practice-cell ${kind}`}>
-      <div className="cell-midline" aria-hidden="true" />
-      <LetterGlyph pathData={pathData} />
+      <div className="practice-letter-frame">
+        <div className="cell-topline" aria-hidden="true" />
+        <div className="cell-midline" aria-hidden="true" />
+        <div className="cell-baseline" aria-hidden="true" />
+        <LetterGlyph
+          pathData={pathData}
+          preserveAspectRatio="none"
+          style={opacity == null ? undefined : { opacity }}
+        />
+      </div>
     </div>
   );
 }
@@ -50,8 +58,13 @@ function WorksheetPage({ spec, paths }) {
               height: `${row.heightMm}mm`
             }}
           >
-            {row.pattern.map((kind, index) => (
-              <Slot key={`${row.id}-${kind}-${index}`} kind={kind} paths={paths} />
+            {row.pattern.map((cell, index) => (
+              <Slot
+                key={`${row.id}-${cell.kind}-${index}`}
+                kind={cell.kind}
+                opacity={cell.opacity}
+                paths={paths}
+              />
             ))}
           </div>
         ))}
@@ -62,9 +75,9 @@ function WorksheetPage({ spec, paths }) {
 
 export function PreviewClient() {
   const searchParams = useSearchParams();
-  const { text, includeLowercase } = parseWorksheetSearchParams(searchParams);
-  const { chars, specs } = buildWorksheetBatch(text, { includeLowercase });
-  const backParams = worksheetBackParams({ text, includeLowercase });
+  const { text } = parseWorksheetSearchParams(searchParams);
+  const { chars, specs } = buildWorksheetBatch(text);
+  const backParams = worksheetBackParams({ text });
 
   const [worksheets, setWorksheets] = useState(null);
   const [error, setError] = useState(null);
@@ -105,7 +118,7 @@ export function PreviewClient() {
     return () => {
       cancelled = true;
     };
-  }, [text, includeLowercase]);
+  }, [text]);
 
   return (
     <main className="preview-root">
