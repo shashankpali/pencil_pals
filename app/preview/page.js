@@ -1,24 +1,15 @@
 import Link from "next/link";
 
 import { parseWorksheetParams, worksheetBackParams } from "@/lib/params.js";
-import { getHeroLetterPath, getLetterPath } from "@/lib/renderLetterPath.js";
+import { loadWorksheetPaths } from "@/lib/renderLetterPath.js";
 import { buildWorksheetBatch } from "@/lib/worksheets.js";
 import { HeroLetter } from "../ui/HeroLetter.js";
+import { LetterGlyph } from "../ui/LetterGlyph.js";
 import { PrintButton } from "../ui/PrintButton.js";
 
-function LetterGlyph({ pathData }) {
-  if (!pathData) {
-    return null;
-  }
+function Slot({ kind, paths }) {
+  const pathData = kind === "blank" ? null : paths[kind];
 
-  return (
-    <svg className="letter-glyph" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-      <path d={pathData} fill="currentColor" />
-    </svg>
-  );
-}
-
-function Slot({ kind, pathData }) {
   return (
     <div className={`practice-cell ${kind}`}>
       <div className="cell-midline" aria-hidden="true" />
@@ -28,25 +19,13 @@ function Slot({ kind, pathData }) {
 }
 
 async function WorksheetPage({ spec }) {
-  const { pathData: heroPathData } = await getHeroLetterPath(spec.char);
-  const rows = await Promise.all(
-    spec.rows.map(async (row) => ({
-      ...row,
-      slots: await Promise.all(
-        row.pattern.map(async (kind, index) => ({
-          key: `${row.id}-${kind}-${index}`,
-          kind,
-          pathData: kind === "blank" ? null : await getLetterPath(spec.char, kind)
-        }))
-      )
-    }))
-  );
+  const paths = await loadWorksheetPaths(spec.char);
 
   return (
     <article className="worksheet-page">
       <header className="worksheet-header">
         <section className="hero-panel">
-          <HeroLetter pathData={heroPathData} />
+          <HeroLetter pathData={paths.hero} />
           <div className="hero-copy">
             <strong>{spec.heroTitle}</strong>
             <span>{spec.heroSubtitle}</span>
@@ -60,7 +39,7 @@ async function WorksheetPage({ spec }) {
       </header>
 
       <section className="worksheet-rows">
-        {rows.map((row) => (
+        {spec.rows.map((row) => (
           <div
             key={row.id}
             className="worksheet-row"
@@ -69,8 +48,8 @@ async function WorksheetPage({ spec }) {
               height: `${row.heightMm}mm`
             }}
           >
-            {row.slots.map((slot) => (
-              <Slot key={slot.key} kind={slot.kind} pathData={slot.pathData} />
+            {row.pattern.map((kind, index) => (
+              <Slot key={`${row.id}-${kind}-${index}`} kind={kind} paths={paths} />
             ))}
           </div>
         ))}

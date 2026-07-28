@@ -9,10 +9,10 @@ import metrics from "./letterMetrics.json" with { type: "json" };
 const DEFAULT_PLACEMENT = { x: 50, y: 92, fontSize: 84 };
 const HERO_ARROW_FONT_FILE = path.join(process.cwd(), HERO_ARROW_FONT);
 
-let fontsPromise = null;
+let fontsPromise;
 let heroArrowFont;
 
-function loadHeroArrowFontFromDisk() {
+function loadHeroArrowFont() {
   if (heroArrowFont !== undefined) {
     return heroArrowFont;
   }
@@ -33,34 +33,47 @@ async function loadFonts() {
         const response = await fetch(url);
         return [key, parseFont(await response.arrayBuffer())];
       })
-    ).then((entries) => Object.fromEntries(entries));
+    ).then(Object.fromEntries);
   }
 
   return fontsPromise;
 }
 
-export function getLetterPlacement(char, kind) {
+function getPlacement(char, kind) {
   const style = kind === "solid" ? "solid" : "dashed";
   return metrics[style]?.[char] ?? DEFAULT_PLACEMENT;
 }
 
+function toPathData(font, char, placement) {
+  return font.getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2);
+}
+
 export async function getLetterPath(char, kind) {
   const fonts = await loadFonts();
-  const style = kind === "solid" ? "solid" : "dashed";
-  const placement = getLetterPlacement(char, kind);
-
-  return fonts[style].getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2);
+  return toPathData(fonts[kind === "solid" ? "solid" : "dashed"], char, getPlacement(char, kind));
 }
 
 export async function getHeroLetterPath(char) {
-  const arrowFont = loadHeroArrowFontFromDisk();
+  const arrowFont = loadHeroArrowFont();
+  const placement = getPlacement(char, "solid");
 
   if (arrowFont) {
-    const placement = getLetterPlacement(char, "solid");
-    return {
-      pathData: arrowFont.getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2)
-    };
+    return { pathData: toPathData(arrowFont, char, placement) };
   }
 
   return { pathData: await getLetterPath(char, "solid") };
+}
+
+export async function loadWorksheetPaths(char) {
+  const [hero, solid, dotted] = await Promise.all([
+    getHeroLetterPath(char),
+    getLetterPath(char, "solid"),
+    getLetterPath(char, "dotted")
+  ]);
+
+  return {
+    hero: hero.pathData,
+    solid,
+    dotted
+  };
 }

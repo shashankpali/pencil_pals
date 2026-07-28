@@ -49,7 +49,7 @@ data/          Future per-character metadata
 
 1. User enters text (e.g. `AB12`) and chooses whether to include lowercase.
 2. Input expands to supported characters: `A, a, B, b, 1, 2`.
-3. Each character gets one A4 worksheet spec with a hero letter and 5 practice rows.
+3. Each character gets one A4 worksheet spec with a hero letter and 10 practice rows.
 4. Preview renders SVG letter paths; print uses the browser's save-as-PDF.
 
 ### Worksheet layout
@@ -58,13 +58,13 @@ Each sheet has:
 
 - **Hero panel** — large demo letter (stroke arrows come from custom font when added)
 - **Image panel** — draw & color prompt
-- **5 practice rows** — solid → dotted → blank, heights taper 18 → 16 → 15 mm
+- **10 practice rows** — solid → dotted → blank, fading support row by row
 
 | Row | Height | Items | Pattern |
 |-----|--------|-------|---------|
-| 1 | 18 mm | 6 | 2 solid, 2 dotted, 2 blank |
-| 2 | 16 mm | 7 | 2 solid, 2 dotted, 3 blank |
-| 3–5 | 15 mm | 8 | 2 solid, 2 dotted, 4 blank |
+| 1 | 18 mm | 6 | 2 solid, 4 dotted |
+| 2 | 16 mm | 7 | 1 solid, 6 dotted |
+| 3–10 | 15 mm | 8 | dotted count fades (8 → 1), rest blank |
 
 ## Product direction
 
