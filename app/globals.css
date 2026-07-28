@@ -1,0 +1,371 @@
+@import url("https://fonts.cdnfonts.com/css/print");
+
+:root {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --line: #cbd5e1;
+  --soft: #e2e8f0;
+  --accent: #0d9488;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.landing,
+.preview-root {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 56px;
+}
+
+.card,
+.cardish {
+  background: var(--panel);
+  border: 1px solid var(--soft);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.card {
+  padding: 32px;
+  max-width: 760px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 40px;
+  line-height: 1.1;
+}
+
+.intro,
+.notes,
+.toolbar-actions,
+.empty-state,
+.hero-copy span,
+.image-label {
+  color: var(--muted);
+}
+
+.generator-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  font-weight: 600;
+}
+
+.field input[type="text"] {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.notes {
+  margin-top: 22px;
+  font-size: 15px;
+}
+
+.preview-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.preview-stack {
+  display: grid;
+  gap: 24px;
+}
+
+.worksheet-page {
+  --ink-solid: #5d5d5d;
+  --ink-trace: #969696;
+  --ink-rule: #d6d6d6;
+
+  width: 210mm;
+  min-height: 297mm;
+  padding: 20mm;
+  margin: 0 auto;
+  background: white;
+  border: 1px solid var(--soft);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  page-break-after: always;
+}
+
+.worksheet-header {
+  display: grid;
+  grid-template-columns: 1.35fr 1.25fr;
+  gap: 8mm;
+  margin-bottom: 5mm;
+}
+
+.hero-panel,
+.image-panel {
+  border: 1px solid var(--ink-rule);
+  border-radius: 10mm;
+  padding: 6mm;
+}
+
+.image-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.hero-letter-box {
+  position: relative;
+  width: 100%;
+  height: 42mm;
+  overflow: hidden;
+}
+
+.hero-topline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8%;
+  border-top: 0.35mm solid var(--ink-rule);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-midline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 0.35mm dashed var(--ink-rule);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-baseline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 92%;
+  border-top: 0.35mm solid var(--ink-rule);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-letter-glyph {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--ink-solid);
+  z-index: 1;
+}
+
+.hero-letter-path {
+  color: var(--ink-solid);
+}
+
+.stroke-guide {
+  color: #7a7a7a;
+}
+
+.stroke-number {
+  font-size: 6.5px;
+  font-weight: 700;
+  fill: currentColor;
+  font-family: Arial, Helvetica, sans-serif;
+  paint-order: stroke fill;
+  stroke: #fff;
+  stroke-width: 2px;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 4px;
+  margin-top: 4mm;
+  color: var(--ink-solid);
+}
+
+.worksheet-page .hero-copy strong,
+.worksheet-page .image-label {
+  color: var(--ink-solid);
+}
+
+.worksheet-page .hero-copy span {
+  color: var(--ink-trace);
+}
+
+.image-label {
+  font-size: 3.6mm;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 4mm;
+  white-space: nowrap;
+}
+
+.image-placeholder {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--ink-rule);
+  border-radius: 6mm;
+  color: var(--ink-trace);
+  text-transform: capitalize;
+}
+
+.worksheet-rows {
+  display: grid;
+  gap: 2mm;
+}
+
+.worksheet-row {
+  display: grid;
+  gap: 0;
+  width: 100%;
+}
+
+.practice-cell {
+  position: relative;
+  border: 0.35mm solid var(--ink-rule);
+  overflow: hidden;
+}
+
+.practice-cell + .practice-cell {
+  border-left: 0;
+}
+
+.cell-midline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 0.35mm dashed var(--ink-rule);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.practice-cell.solid .letter-glyph {
+  color: var(--ink-solid);
+}
+
+.practice-cell.dotted .letter-glyph {
+  color: var(--ink-trace);
+}
+
+.letter-glyph {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1 / 1;
+  transform: translateX(-50%);
+  display: block;
+}
+
+.empty-state {
+  padding: 24px;
+}
+
+@media print {
+  html,
+  body {
+    background: white;
+  }
+
+  .preview-root {
+    max-width: none;
+    padding: 0;
+  }
+
+  .preview-toolbar {
+    display: none;
+  }
+
+  .preview-stack {
+    gap: 0;
+  }
+
+  .worksheet-page {
+    margin: 0;
+    border: 0;
+    box-shadow: none;
+  }
+}

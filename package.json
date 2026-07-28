@@ -1,0 +1,25 @@
+{
+  "name": "pencil-pals",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pencil Pals — screen-free printable handwriting worksheets for kids",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "generate": "node src/index.js",
+    "generate-hero-glyphs": "node scripts/generate-hero-glyphs.mjs",
+    "check-hero-glyphs": "node scripts/check-hero-glyphs.mjs"
+  },
+  "dependencies": {
+    "@fontsource/raleway-dots": "^5.3.0",
+    "next": "^16.2.12",
+    "opentype.js": "^2.0.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}
