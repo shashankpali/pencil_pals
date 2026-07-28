@@ -8,9 +8,7 @@ export default async function HomePage({ searchParams }) {
   const params = await searchParams;
   const text = getQueryValue(params?.text) ?? EXAMPLE_TEXT;
   const lowercaseParam = getQueryValue(params?.lowercase);
-  const arrowsParam = getQueryValue(params?.arrows);
   const includeLowercase = lowercaseParam === undefined ? true : lowercaseParam === "1";
-  const showArrows = arrowsParam === undefined ? true : arrowsParam === "1";
 
   return (
     <main className="landing">
@@ -37,11 +35,6 @@ export default async function HomePage({ searchParams }) {
           <label className="checkbox">
             <input type="checkbox" name="lowercase" defaultChecked={includeLowercase} value="1" />
             <span>Include lowercase versions for letters</span>
-          </label>
-
-          <label className="checkbox">
-            <input type="checkbox" name="arrows" defaultChecked={showArrows} value="1" />
-            <span>Show guiding arrows on demo letter</span>
           </label>
 
           <div className="actions">

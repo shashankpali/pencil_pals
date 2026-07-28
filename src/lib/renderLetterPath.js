@@ -3,8 +3,6 @@ import path from "node:path";
 
 import { parse as parseFont } from "opentype.js/dist/opentype.mjs";
 
-import heroGlyphs from "./heroGlyphs.json" with { type: "json" };
-import { isHeroGlyphChar } from "./heroGlyphChars.js";
 import metrics from "./letterMetrics.json" with { type: "json" };
 
 const FONT_URLS = {
@@ -38,14 +36,6 @@ export function hasHeroArrowFont() {
   return Boolean(loadHeroArrowFontFromDisk());
 }
 
-export function hasHeroGlyph(char) {
-  return Boolean(heroGlyphs[char]);
-}
-
-export function listHeroGlyphs() {
-  return Object.keys(heroGlyphs).sort();
-}
-
 async function loadFonts() {
   if (!fontsPromise) {
     fontsPromise = Promise.all(
@@ -74,41 +64,18 @@ export async function getLetterPath(char, kind) {
   return font.getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2);
 }
 
-export async function getHeroLetterPath(char, { includeArrows = true } = {}) {
-  if (!isHeroGlyphChar(char)) {
-    return {
-      pathData: await getLetterPath(char, "solid"),
-      guides: [],
-      hasArrows: false
-    };
-  }
-
-  if (heroGlyphs[char]) {
-    const glyph = heroGlyphs[char];
-    const letter = typeof glyph === "string" ? glyph : glyph.letter;
-    const guides = includeArrows && typeof glyph !== "string" ? glyph.guides ?? [] : [];
-
-    return {
-      pathData: letter,
-      guides,
-      hasArrows: guides.length > 0
-    };
-  }
-
+export async function getHeroLetterPath(char) {
   const arrowFont = loadHeroArrowFontFromDisk();
 
-  if (arrowFont && includeArrows) {
+  if (arrowFont) {
     const placement = getLetterPlacement(char, "solid");
+
     return {
-      pathData: arrowFont.getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2),
-      guides: [],
-      hasArrows: true
+      pathData: arrowFont.getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2)
     };
   }
 
   return {
-    pathData: await getLetterPath(char, "solid"),
-    guides: [],
-    hasArrows: false
+    pathData: await getLetterPath(char, "solid")
   };
 }

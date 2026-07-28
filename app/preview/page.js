@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import { buildWorksheetSpec } from "../../src/lib/buildWorksheetSpec.js";
 import { expandCharacters } from "../../src/lib/expandCharacters.js";
-import { getStrokeLabelPosition } from "../../src/lib/heroStrokeGuides.js";
 import { getHeroLetterPath, getLetterPath } from "../../src/lib/renderLetterPath.js";
+import { HeroLetter } from "../ui/HeroLetter.js";
 import { PrintButton } from "../ui/PrintButton.js";
 
 function getQueryValue(value) {
@@ -26,60 +26,6 @@ function LetterGlyph({ pathData }) {
   );
 }
 
-function HeroLetter({ pathData, guides, markerId }) {
-  const arrowMarker = `url(#${markerId})`;
-
-  return (
-    <div className="hero-letter-box">
-      <div className="hero-topline" aria-hidden="true" />
-      <div className="hero-midline" aria-hidden="true" />
-      <div className="hero-baseline" aria-hidden="true" />
-      <svg className="hero-letter-glyph" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <defs>
-          <marker id={markerId} markerWidth="5" markerHeight="5" refX="4.5" refY="2.5" orient="auto" markerUnits="strokeWidth">
-            <path d="M0,0 L5,2.5 L0,5 Z" fill="currentColor" />
-          </marker>
-        </defs>
-
-        {pathData ? <path d={pathData} fill="currentColor" className="hero-letter-path" /> : null}
-
-        {guides.map((stroke) => {
-          const label = getStrokeLabelPosition(stroke);
-
-          return (
-            <g key={stroke.num} className="stroke-guide">
-              {stroke.d ? (
-                <path
-                  d={stroke.d}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  markerEnd={arrowMarker}
-                />
-              ) : (
-                <line
-                  x1={stroke.x1}
-                  y1={stroke.y1}
-                  x2={stroke.x2}
-                  y2={stroke.y2}
-                  stroke="currentColor"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  markerEnd={arrowMarker}
-                />
-              )}
-              <text x={label.x} y={label.y} className="stroke-number" textAnchor="middle">
-                {stroke.num}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-    </div>
-  );
-}
-
 function Slot({ kind, pathData }) {
   return (
     <div className={`practice-cell ${kind}`}>
@@ -89,10 +35,8 @@ function Slot({ kind, pathData }) {
   );
 }
 
-async function WorksheetPage({ spec, showArrows }) {
-  const { pathData: heroPathData, guides: heroGuides, hasArrows } = await getHeroLetterPath(spec.char, {
-    includeArrows: showArrows
-  });
+async function WorksheetPage({ spec }) {
+  const { pathData: heroPathData } = await getHeroLetterPath(spec.char);
   const practiceRows = getPrintableRows(spec);
   const rows = await Promise.all(
     practiceRows.map(async (row) => ({
@@ -111,14 +55,10 @@ async function WorksheetPage({ spec, showArrows }) {
     <article className="worksheet-page">
       <header className="worksheet-header">
         <section className="hero-panel">
-          <HeroLetter
-            pathData={heroPathData}
-            guides={heroGuides}
-            markerId={`stroke-arrow-${spec.type}-${spec.char}`}
-          />
+          <HeroLetter pathData={heroPathData} />
           <div className="hero-copy">
             <strong>{spec.heroTitle}</strong>
-            <span>{hasArrows ? "Follow the numbered arrows." : spec.heroSubtitle}</span>
+            <span>{spec.heroSubtitle}</span>
           </div>
         </section>
 
@@ -152,7 +92,6 @@ export default async function PreviewPage({ searchParams }) {
   const params = await searchParams;
   const text = getQueryValue(params?.text) ?? "A5";
   const includeLowercase = getQueryValue(params?.lowercase) === "1";
-  const showArrows = getQueryValue(params?.arrows) === "1";
 
   const chars = expandCharacters(text, includeLowercase, true);
   const specs = chars.map(buildWorksheetSpec);
@@ -160,8 +99,6 @@ export default async function PreviewPage({ searchParams }) {
   const backParams = new URLSearchParams({ text });
   if (includeLowercase) backParams.set("lowercase", "1");
   else backParams.set("lowercase", "0");
-  if (showArrows) backParams.set("arrows", "1");
-  else backParams.set("arrows", "0");
 
   return (
     <main className="preview-root">
@@ -171,9 +108,6 @@ export default async function PreviewPage({ searchParams }) {
           <h1>{chars.length ? `${chars.length} worksheet${chars.length > 1 ? "s" : ""}` : "No supported characters"}</h1>
           <p>
             Input: <code>{text}</code>
-          </p>
-          <p>
-            Guiding arrows: <code>{showArrows ? "on" : "off"}</code>
           </p>
         </div>
 
@@ -186,7 +120,7 @@ export default async function PreviewPage({ searchParams }) {
       {specs.length ? (
         <section className="preview-stack">
           {specs.map((spec) => (
-            <WorksheetPage key={`${spec.type}-${spec.char}`} spec={spec} showArrows={showArrows} />
+            <WorksheetPage key={`${spec.type}-${spec.char}`} spec={spec} />
           ))}
         </section>
       ) : (

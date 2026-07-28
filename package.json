@@ -8,9 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "generate": "node src/index.js",
-    "generate-hero-glyphs": "node scripts/generate-hero-glyphs.mjs",
-    "check-hero-glyphs": "node scripts/check-hero-glyphs.mjs"
+    "generate": "node src/index.js"
   },
   "dependencies": {
     "@fontsource/raleway-dots": "^5.3.0",

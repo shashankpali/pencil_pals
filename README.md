@@ -19,12 +19,15 @@ Open [http://localhost:3000](http://localhost:3000).
 |---------|-------------|
 | `npm run dev` | Start development server |
 | `npm run build` | Production build |
-| `npm run generate-hero-glyphs` | Regenerate hero letter + arrow data |
-| `npm run check-hero-glyphs` | Show hero glyph coverage (A–Z, 0–9) |
+| `npm run generate` | Generate static HTML worksheets in `output/` |
 
 ## Project layout
 
 - `app/` — Next.js website (form, preview, print)
-- `src/lib/` — Worksheet logic, fonts, hero glyphs
-- `public/fonts/` — Custom hero arrow font (optional)
+- `src/lib/` — Worksheet logic and fonts
+- `public/fonts/` — Custom hero arrow font (add `hero-arrows.woff` when ready)
 - `BRAINSTORMING.md` — Product notes and roadmap
+
+## Hero arrow font (future)
+
+Stroke-order arrows for the hero panel will come from a custom font at `public/fonts/hero-arrows.woff`. Once added, the app loads it automatically for the demo letter. See `public/fonts/README.md`.
