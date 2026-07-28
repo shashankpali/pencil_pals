@@ -1,4 +1,4 @@
-const EXAMPLE_TEXT = "ABCD1234";
+import { DEFAULT_TEXT } from "@/lib/params.js";
 
 export default function HomePage() {
   return (
@@ -17,8 +17,8 @@ export default function HomePage() {
             <input
               type="text"
               name="text"
-              defaultValue={EXAMPLE_TEXT}
-              placeholder={EXAMPLE_TEXT}
+              defaultValue={DEFAULT_TEXT}
+              placeholder={DEFAULT_TEXT}
               autoComplete="off"
             />
           </label>
@@ -29,7 +29,10 @@ export default function HomePage() {
         </form>
 
         <div className="notes">
-          <p>Example: entering <code>AB12</code> generates sheets for A, B, 1, and 2. Type lowercase letters if you want those sheets too.</p>
+          <p>
+            Example: entering <code>AB12</code> generates sheets for A, B, 1, and 2. Type lowercase
+            letters if you want those sheets too.
+          </p>
         </div>
       </section>
     </main>

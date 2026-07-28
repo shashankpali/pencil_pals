@@ -20,41 +20,33 @@ const GUIDE_BASE_VIEW = 91.3;
 function sharedPlacement(font) {
   const scaleGap = (GUIDE_MID_FONT_Y - GUIDE_BASE_FONT_Y) / font.unitsPerEm;
   const fontSize = (GUIDE_BASE_VIEW - GUIDE_MID_VIEW) / scaleGap;
-  // baselineY such that fontY=GUIDE_BASE_FONT_Y lands on GUIDE_BASE_VIEW
-  const baselineY = GUIDE_BASE_VIEW + (GUIDE_BASE_FONT_Y * fontSize) / font.unitsPerEm;
+  const y = GUIDE_BASE_VIEW + (GUIDE_BASE_FONT_Y * fontSize) / font.unitsPerEm;
 
   return {
-    y: +baselineY.toFixed(2),
+    y: +y.toFixed(2),
     fontSize: +fontSize.toFixed(2)
   };
 }
 
 function centerX(font, char, fontSize, baselineY) {
-  const path = font.charToGlyph(char).getPath(0, baselineY, fontSize);
-  const bbox = path.getBoundingBox();
+  const bbox = font.charToGlyph(char).getPath(0, baselineY, fontSize).getBoundingBox();
   const width = bbox.x2 - bbox.x1;
   if (!width) return VIEW / 2;
   return +((VIEW - width) / 2 - bbox.x1).toFixed(2);
 }
 
 const font = parseFont(fs.readFileSync(FONT_FILE).buffer);
-const { y, fontSize } = sharedPlacement(font);
-const metrics = {};
+const shared = sharedPlacement(font);
+const x = {};
 
 for (const char of CHARS) {
-  const glyph = font.charToGlyph(char);
-  if (!glyph.unicode) continue;
-
-  metrics[char] = {
-    x: centerX(font, char, fontSize, y),
-    y,
-    fontSize
-  };
+  if (font.charToGlyph(char).unicode) {
+    x[char] = centerX(font, char, shared.fontSize, shared.y);
+  }
 }
 
 const outPath = new URL("../src/lib/letterMetrics.json", import.meta.url);
-fs.writeFileSync(outPath, `${JSON.stringify(metrics, null, 2)}\n`, "utf8");
+fs.writeFileSync(outPath, `${JSON.stringify({ shared, x }, null, 2)}\n`, "utf8");
 
-console.log(`Wrote metrics for ${Object.keys(metrics).length} characters`);
-console.log(`Shared placement: y=${y}, fontSize=${fontSize}`);
-console.log(`Guides → mid ${GUIDE_MID_VIEW}%, base ${GUIDE_BASE_VIEW}%`);
+console.log(`Wrote metrics for ${Object.keys(x).length} characters`);
+console.log(`Shared placement: y=${shared.y}, fontSize=${shared.fontSize}`);

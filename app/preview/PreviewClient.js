@@ -7,21 +7,18 @@ import { useEffect, useState } from "react";
 import { parseWorksheetSearchParams, worksheetBackParams } from "@/lib/params.js";
 import { loadWorksheetPaths } from "@/lib/renderLetterPath.js";
 import { buildWorksheetBatch } from "@/lib/worksheets.js";
+import { GuideLines } from "../ui/GuideLines.js";
 import { HeroLetter } from "../ui/HeroLetter.js";
 import { LetterGlyph } from "../ui/LetterGlyph.js";
 import { PrintButton } from "../ui/PrintButton.js";
 
-function Slot({ kind, opacity, paths }) {
-  const pathData = kind === "blank" ? null : paths[kind];
-
+function Slot({ kind, opacity, letter }) {
   return (
     <div className={`practice-cell ${kind}`}>
       <div className="practice-letter-frame">
-        <div className="cell-topline" aria-hidden="true" />
-        <div className="cell-midline" aria-hidden="true" />
-        <div className="cell-baseline" aria-hidden="true" />
+        <GuideLines />
         <LetterGlyph
-          pathData={pathData}
+          pathData={kind === "blank" ? null : letter}
           preserveAspectRatio="none"
           style={opacity == null ? undefined : { opacity }}
         />
@@ -63,7 +60,7 @@ function WorksheetPage({ spec, paths }) {
                 key={`${row.id}-${cell.kind}-${index}`}
                 kind={cell.kind}
                 opacity={cell.opacity}
-                paths={paths}
+                letter={paths.letter}
               />
             ))}
           </div>
@@ -77,7 +74,7 @@ export function PreviewClient() {
   const searchParams = useSearchParams();
   const { text } = parseWorksheetSearchParams(searchParams);
   const { chars, specs } = buildWorksheetBatch(text);
-  const backParams = worksheetBackParams({ text });
+  const backHref = `/?${worksheetBackParams({ text })}`;
 
   const [worksheets, setWorksheets] = useState(null);
   const [error, setError] = useState(null);
@@ -85,7 +82,7 @@ export function PreviewClient() {
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
+    (async () => {
       if (!specs.length) {
         setWorksheets([]);
         setError(null);
@@ -102,38 +99,36 @@ export function PreviewClient() {
             paths: await loadWorksheetPaths(spec.char)
           }))
         );
-
-        if (!cancelled) {
-          setWorksheets(loaded);
-        }
+        if (!cancelled) setWorksheets(loaded);
       } catch (loadError) {
         if (!cancelled) {
           setError(loadError instanceof Error ? loadError.message : "Failed to load worksheets.");
         }
       }
-    }
-
-    load();
+    })();
 
     return () => {
       cancelled = true;
     };
   }, [text]);
 
+  const title = chars.length
+    ? `${chars.length} worksheet${chars.length > 1 ? "s" : ""}`
+    : "No supported characters";
+
   return (
     <main className="preview-root">
       <section className="preview-toolbar">
         <div>
           <p className="eyebrow">Pencil Pals</p>
-          <h1>{chars.length ? `${chars.length} worksheet${chars.length > 1 ? "s" : ""}` : "No supported characters"}</h1>
+          <h1>{title}</h1>
           <p>
             Input: <code>{text}</code>
           </p>
         </div>
-
         <div className="toolbar-actions">
           <PrintButton />
-          <Link href={`/?${backParams.toString()}`}>Back</Link>
+          <Link href={backHref}>Back</Link>
         </div>
       </section>
 
@@ -152,7 +147,7 @@ export function PreviewClient() {
       {!error && worksheets?.length ? (
         <section className="preview-stack">
           {worksheets.map(({ spec, paths }) => (
-            <WorksheetPage key={`${spec.type}-${spec.char}`} spec={spec} paths={paths} />
+            <WorksheetPage key={spec.char} spec={spec} paths={paths} />
           ))}
         </section>
       ) : null}
@@ -160,7 +155,9 @@ export function PreviewClient() {
       {!error && worksheets && !worksheets.length ? (
         <section className="empty-state cardish">
           <p>No supported letters or numbers were found in the input.</p>
-          <p>Try something like <code>AB12</code>.</p>
+          <p>
+            Try something like <code>AB12</code>.
+          </p>
         </section>
       ) : null}
     </main>

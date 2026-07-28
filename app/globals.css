@@ -192,34 +192,26 @@ button {
   overflow: visible;
 }
 
-.hero-topline {
+.guide-line {
   position: absolute;
   left: 0;
   right: 0;
+  border-top: 0.35mm solid var(--ink-rule);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.guide-top {
   top: var(--guide-top);
-  border-top: 0.35mm dashed var(--ink-rule);
-  pointer-events: none;
-  z-index: 0;
+  border-top-style: dashed;
 }
 
-.hero-midline {
-  position: absolute;
-  left: 0;
-  right: 0;
+.guide-mid {
   top: var(--guide-mid);
-  border-top: 0.35mm solid var(--ink-rule);
-  pointer-events: none;
-  z-index: 0;
 }
 
-.hero-baseline {
-  position: absolute;
-  left: 0;
-  right: 0;
+.guide-base {
   top: var(--guide-base);
-  border-top: 0.35mm solid var(--ink-rule);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .hero-letter-glyph {
@@ -229,10 +221,6 @@ button {
   height: 100%;
   color: var(--ink-solid);
   z-index: 1;
-}
-
-.hero-letter-path {
-  color: var(--ink-solid);
 }
 
 .hero-copy {
@@ -295,30 +283,6 @@ button {
   height: 100%;
   aspect-ratio: 1 / 1;
   transform: translateX(-50%);
-}
-
-.cell-topline,
-.cell-midline,
-.cell-baseline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  border-top: 0.35mm solid var(--ink-rule);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.cell-topline {
-  top: var(--guide-top);
-  border-top-style: dashed;
-}
-
-.cell-midline {
-  top: var(--guide-mid);
-}
-
-.cell-baseline {
-  top: var(--guide-base);
 }
 
 .practice-cell.solid .letter-glyph,
