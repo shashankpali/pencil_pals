@@ -3,19 +3,14 @@ import path from "node:path";
 
 import { parse as parseFont } from "opentype.js/dist/opentype.mjs";
 
+import { FONT_URLS, HERO_ARROW_FONT } from "./fonts.js";
 import metrics from "./letterMetrics.json" with { type: "json" };
 
-const FONT_URLS = {
-  solid: "https://fonts.cdnfonts.com/s/20683/PrintBold_TT.woff",
-  dashed: "https://fonts.cdnfonts.com/s/20683/PrintDashed_TT.woff"
-};
-
-const HERO_ARROW_FONT_FILE = path.join(process.cwd(), "public/fonts/hero-arrows.woff");
-
-const DEFAULT = { x: 50, y: 92, fontSize: 84 };
+const DEFAULT_PLACEMENT = { x: 50, y: 92, fontSize: 84 };
+const HERO_ARROW_FONT_FILE = path.join(process.cwd(), HERO_ARROW_FONT);
 
 let fontsPromise = null;
-let heroArrowFont = undefined;
+let heroArrowFont;
 
 function loadHeroArrowFontFromDisk() {
   if (heroArrowFont !== undefined) {
@@ -23,8 +18,7 @@ function loadHeroArrowFontFromDisk() {
   }
 
   try {
-    const buffer = fs.readFileSync(HERO_ARROW_FONT_FILE);
-    heroArrowFont = parseFont(buffer);
+    heroArrowFont = parseFont(fs.readFileSync(HERO_ARROW_FONT_FILE));
   } catch {
     heroArrowFont = null;
   }
@@ -32,17 +26,12 @@ function loadHeroArrowFontFromDisk() {
   return heroArrowFont;
 }
 
-export function hasHeroArrowFont() {
-  return Boolean(loadHeroArrowFontFromDisk());
-}
-
 async function loadFonts() {
   if (!fontsPromise) {
     fontsPromise = Promise.all(
       Object.entries(FONT_URLS).map(async ([key, url]) => {
         const response = await fetch(url);
-        const buffer = await response.arrayBuffer();
-        return [key, parseFont(buffer)];
+        return [key, parseFont(await response.arrayBuffer())];
       })
     ).then((entries) => Object.fromEntries(entries));
   }
@@ -52,16 +41,15 @@ async function loadFonts() {
 
 export function getLetterPlacement(char, kind) {
   const style = kind === "solid" ? "solid" : "dashed";
-  return metrics[style]?.[char] ?? DEFAULT;
+  return metrics[style]?.[char] ?? DEFAULT_PLACEMENT;
 }
 
 export async function getLetterPath(char, kind) {
   const fonts = await loadFonts();
   const style = kind === "solid" ? "solid" : "dashed";
-  const font = fonts[style];
   const placement = getLetterPlacement(char, kind);
 
-  return font.getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2);
+  return fonts[style].getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2);
 }
 
 export async function getHeroLetterPath(char) {
@@ -69,13 +57,10 @@ export async function getHeroLetterPath(char) {
 
   if (arrowFont) {
     const placement = getLetterPlacement(char, "solid");
-
     return {
       pathData: arrowFont.getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2)
     };
   }
 
-  return {
-    pathData: await getLetterPath(char, "solid")
-  };
+  return { pathData: await getLetterPath(char, "solid") };
 }

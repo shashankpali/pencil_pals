@@ -1,14 +1,9 @@
+import { parseWorksheetParams } from "@/lib/params.js";
+
 const EXAMPLE_TEXT = "ABCD1234";
 
-function getQueryValue(value) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
 export default async function HomePage({ searchParams }) {
-  const params = await searchParams;
-  const text = getQueryValue(params?.text) ?? EXAMPLE_TEXT;
-  const lowercaseParam = getQueryValue(params?.lowercase);
-  const includeLowercase = lowercaseParam === undefined ? true : lowercaseParam === "1";
+  const { text, includeLowercase } = parseWorksheetParams(await searchParams);
 
   return (
     <main className="landing">
@@ -26,8 +21,8 @@ export default async function HomePage({ searchParams }) {
             <input
               type="text"
               name="text"
-              defaultValue={text}
-              placeholder="ABCD1234"
+              defaultValue={text || EXAMPLE_TEXT}
+              placeholder={EXAMPLE_TEXT}
               autoComplete="off"
             />
           </label>
@@ -44,7 +39,6 @@ export default async function HomePage({ searchParams }) {
 
         <div className="notes">
           <p>Example: entering <code>AB12</code> generates sheets for A, a, B, b, 1, and 2.</p>
-          <p>PDF/PNG export will build on the same printable page layout.</p>
         </div>
       </section>
     </main>

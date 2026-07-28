@@ -1,21 +1,17 @@
 import fs from "node:fs";
+
 import opentype from "opentype.js";
 
+import { FONT_URLS } from "../src/lib/fonts.js";
+
 const parseFont = opentype.parse;
-
-const FONT_URLS = {
-  solid: "https://fonts.cdnfonts.com/s/20683/PrintBold_TT.woff",
-  dashed: "https://fonts.cdnfonts.com/s/20683/PrintDashed_TT.woff"
-};
-
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 const VIEW = 100;
 const PAD = 0.08;
 
 async function loadFont(url) {
-  const res = await fetch(url);
-  const buf = await res.arrayBuffer();
-  return parseFont(buf);
+  const response = await fetch(url);
+  return parseFont(await response.arrayBuffer());
 }
 
 function measure(font, char) {
@@ -73,11 +69,3 @@ for (const char of CHARS) {
 const outPath = new URL("../src/lib/letterMetrics.json", import.meta.url);
 fs.writeFileSync(outPath, `${JSON.stringify(metrics, null, 2)}\n`, "utf8");
 console.log(`Wrote metrics for ${Object.keys(metrics.solid).length} characters`);
-
-// spot-check H
-for (const style of ["solid", "dashed"]) {
-  const font = style === "solid" ? solidFont : dashedFont;
-  const m = metrics[style].H;
-  const bbox = font.getPath("H", m.x, m.y, m.fontSize).getBoundingBox();
-  console.log(style, m, bbox);
-}

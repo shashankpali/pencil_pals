@@ -1,18 +1,10 @@
 import Link from "next/link";
 
-import { buildWorksheetSpec } from "../../src/lib/buildWorksheetSpec.js";
-import { expandCharacters } from "../../src/lib/expandCharacters.js";
-import { getHeroLetterPath, getLetterPath } from "../../src/lib/renderLetterPath.js";
+import { parseWorksheetParams, worksheetBackParams } from "@/lib/params.js";
+import { getHeroLetterPath, getLetterPath } from "@/lib/renderLetterPath.js";
+import { buildWorksheetBatch } from "@/lib/worksheets.js";
 import { HeroLetter } from "../ui/HeroLetter.js";
 import { PrintButton } from "../ui/PrintButton.js";
-
-function getQueryValue(value) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-function getPrintableRows(spec) {
-  return spec.rows.filter((row) => row.id !== "hero");
-}
 
 function LetterGlyph({ pathData }) {
   if (!pathData) {
@@ -37,9 +29,8 @@ function Slot({ kind, pathData }) {
 
 async function WorksheetPage({ spec }) {
   const { pathData: heroPathData } = await getHeroLetterPath(spec.char);
-  const practiceRows = getPrintableRows(spec);
   const rows = await Promise.all(
-    practiceRows.map(async (row) => ({
+    spec.rows.map(async (row) => ({
       ...row,
       slots: await Promise.all(
         row.pattern.map(async (kind, index) => ({
@@ -64,7 +55,9 @@ async function WorksheetPage({ spec }) {
 
         <aside className="image-panel">
           <div className="image-label">{spec.imagePrompt}</div>
-          <div className="image-placeholder" aria-label="Drawing area" />
+          <div className="image-placeholder" aria-label="Drawing area">
+            {spec.imageKey ?? ""}
+          </div>
         </aside>
       </header>
 
@@ -89,16 +82,9 @@ async function WorksheetPage({ spec }) {
 }
 
 export default async function PreviewPage({ searchParams }) {
-  const params = await searchParams;
-  const text = getQueryValue(params?.text) ?? "A5";
-  const includeLowercase = getQueryValue(params?.lowercase) === "1";
-
-  const chars = expandCharacters(text, includeLowercase, true);
-  const specs = chars.map(buildWorksheetSpec);
-
-  const backParams = new URLSearchParams({ text });
-  if (includeLowercase) backParams.set("lowercase", "1");
-  else backParams.set("lowercase", "0");
+  const { text, includeLowercase } = parseWorksheetParams(await searchParams);
+  const { chars, specs } = buildWorksheetBatch(text, { includeLowercase });
+  const backParams = worksheetBackParams({ text, includeLowercase });
 
   return (
     <main className="preview-root">
