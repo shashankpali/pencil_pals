@@ -41,8 +41,8 @@ Local check: `npm run build:pages && npx serve out` → open `/pencil_pals/`.
 | App | Next.js 16 (static export), React 19 |
 | Language | JavaScript (ESM) |
 | Layout | CSS mm-based A4 + `@media print` |
-| Letters | opentype.js → SVG paths (CF Second Son School) |
-| Trace | Same glyph at fading opacity (no dashed font) |
+| Letters / digits | Sassoon Primary + Primer Print → SVG via opentype.js |
+| Trace | Sassoon Infant Dotted (letters) + Primer Print Dotted (digits) |
 | Hosting | GitHub Pages |
 
 Shared logic: `src/lib/` via `@/lib/*`.
@@ -54,7 +54,7 @@ app/           UI (form, preview, print)
 src/lib/       Spec, fonts, SVG paths
 src/index.js   Optional CLI HTML stub
 scripts/       Font metrics
-public/fonts/  Practice font (+ optional hero arrows)
+public/fonts/  Sassoon Primary + Infant Dotted + Primer Print (+ Dotted)
 data/          Future per-character metadata
 ```
 
@@ -68,13 +68,13 @@ data/          Future per-character metadata
 
 | Row | Height | Items | Pattern |
 |-----|--------|-------|---------|
-| 1 | 18 mm | 6 | 2 solid, 4 @ `0.45` |
-| 2 | 16 mm | 7 | 1 solid, 6 @ `0.45` |
-| 3 | 15 mm | 8 | 8 @ `0.45` |
-| 4 | 15 mm | 8 | fade `0.45 → 0` (starts at row 3’s opacity) |
-| 5–10 | 15 mm | 8 | drop leading fade steps; rest blank |
+| 1 | 18 mm | 6 | 2 solid, 4 dotted |
+| 2 | 16 mm | 7 | 1 solid, 6 dotted |
+| 3 | 15 mm | 8 | 8 dotted |
+| 4 | 15 mm | 8 | 8 dotted |
+| 5–10 | 15 mm | 8 | one fewer dotted each row; rest blank |
 
-Guide lines match the font (dashed top, solid mid + baseline).
+Guide lines: four-line ruler (solid top & bottom, dashed middle two), equally spaced. Capitals scale to top→baseline; small letters scale to upper mid→baseline.
 
 ## Product direction
 
@@ -86,11 +86,11 @@ Guide lines match the font (dashed top, solid mid + baseline).
 | Parents | Print-ready sheets, no setup |
 | Teachers | Reusable worksheets, batch generation |
 
-**Learning flow:** see big model → trace solid → fade support → write from memory.
+**Learning flow:** see big model → trace solid → dotted support → write from memory.
 
-**Principles:** stroke order matters, scaffold then fade, 5–10 minute sessions, screen-free practice.
+**Principles:** stroke order matters, scaffold then release, 5–10 minute sessions, screen-free practice.
 
-**Font choice:** school-style print font + translucent trace (avoids bad dashed-font glyphs like `t` → `+`). Personal-use font — see `public/fonts/README.md`.
+**Fonts:** Sassoon Primary Regular (solid letters), Primer Print (solid digits), Sassoon Infant Dotted (letter traces), Primer Print Dotted (digit traces). Only `primer-print-dotted.otf` is generated locally; other font files are used as provided.
 
 ## MVP status
 
@@ -98,8 +98,8 @@ Guide lines match the font (dashed top, solid mid + baseline).
 |------|---------|
 | Form + preview + print | PDF/PNG export |
 | A4 layout + guide sync | Per-character JSON in `data/` |
-| Typed letters/numbers | Hero arrow font |
-| Opacity fade rows | Words, cursive, themed packs |
+| Typed letters/numbers | Words, cursive, themed packs |
+| Dotted trace rows | Classroom batch generation |
 
 ## Roadmap
 

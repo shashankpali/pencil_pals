@@ -3,50 +3,81 @@ import path from "node:path";
 
 import { parse as parseFont } from "opentype.js/dist/opentype.mjs";
 
-import { PRACTICE_FONT } from "../src/lib/fonts.js";
+import { DIGIT_FONT, LETTER_FONT, fontFor } from "../src/lib/fonts.js";
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 const VIEW = 100;
-const FONT_FILE = path.join(process.cwd(), "public", PRACTICE_FONT);
 
-/** CF Second Son School baked-in guide band centers (font units). */
-const GUIDE_MID_FONT_Y = 541;
-const GUIDE_BASE_FONT_Y = 8;
+/**
+ * Four-line ruler — equal spacing:
+ *   top solid → upper dashed → lower dashed (baseline) → bottom solid
+ *
+ * Capitals and small letters use different sizes so each fits its bands:
+ *   caps     → top → baseline
+ *   lowercase body → upper → baseline
+ */
+const GUIDE_TOP = 0;
+const GUIDE_UPPER = VIEW / 3;
+const GUIDE_LOWER = (2 * VIEW) / 3;
+const GUIDE_BOTTOM = VIEW;
 
-/** Target viewBox % for CSS guidelines (must match globals.css). */
-const GUIDE_MID_VIEW = 43.2;
-const GUIDE_BASE_VIEW = 91.3;
+const read = (rel) => parseFont(fs.readFileSync(path.join("public", rel)).buffer);
+const letters = read(LETTER_FONT);
+const digits = read(DIGIT_FONT);
+const fonts = { [LETTER_FONT]: letters, [DIGIT_FONT]: digits };
 
-function sharedPlacement(font) {
-  const scaleGap = (GUIDE_MID_FONT_Y - GUIDE_BASE_FONT_Y) / font.unitsPerEm;
-  const fontSize = (GUIDE_BASE_VIEW - GUIDE_MID_VIEW) / scaleGap;
-  const y = GUIDE_BASE_VIEW + (GUIDE_BASE_FONT_Y * fontSize) / font.unitsPerEm;
+const units = letters.unitsPerEm;
 
-  return {
-    y: +y.toFixed(2),
-    fontSize: +fontSize.toFixed(2)
-  };
+/** True ink extents (round caps like O/Q overshoot OS/2 sCapHeight). */
+let capHeight = letters.tables?.os2?.sCapHeight || letters.ascender;
+let xHeight = letters.tables?.os2?.sxHeight || Math.round(capHeight * 0.5);
+for (const ch of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+  if (!letters.charToGlyph(ch).unicode) continue;
+  const b = letters.getPath(ch, 0, 0, units).getBoundingBox();
+  capHeight = Math.max(capHeight, -b.y1);
+}
+{
+  const b = letters.getPath("x", 0, 0, units).getBoundingBox();
+  if (Number.isFinite(b.y1)) xHeight = Math.max(xHeight, -b.y1);
 }
 
-function centerX(font, char, fontSize, baselineY) {
-  const bbox = font.charToGlyph(char).getPath(0, baselineY, fontSize).getBoundingBox();
-  const width = bbox.x2 - bbox.x1;
-  if (!width) return VIEW / 2;
-  return +((VIEW - width) / 2 - bbox.x1).toFixed(2);
+const fontSizeCap = +(((GUIDE_LOWER - GUIDE_TOP) * units) / capHeight).toFixed(2);
+const fontSizeX = +(((GUIDE_LOWER - GUIDE_UPPER) * units) / xHeight).toFixed(2);
+const y = +GUIDE_LOWER.toFixed(2);
+
+const shared = {
+  y,
+  fontSizeCap,
+  fontSizeX,
+  /** @deprecated use fontSizeCap / fontSizeX */
+  fontSize: fontSizeX,
+  guideTop: +GUIDE_TOP.toFixed(2),
+  guideUpper: +GUIDE_UPPER.toFixed(2),
+  guideLower: +GUIDE_LOWER.toFixed(2),
+  guideBottom: +GUIDE_BOTTOM.toFixed(2)
+};
+
+function sizeFor(ch) {
+  if (ch >= "a" && ch <= "z") return fontSizeX;
+  return fontSizeCap;
 }
 
-const font = parseFont(fs.readFileSync(FONT_FILE).buffer);
-const shared = sharedPlacement(font);
-const x = {};
-
-for (const char of CHARS) {
-  if (font.charToGlyph(char).unicode) {
-    x[char] = centerX(font, char, shared.fontSize, shared.y);
-  }
+let maxY2 = 0;
+let minY1 = VIEW;
+for (const ch of CHARS) {
+  const font = fonts[fontFor(ch)];
+  if (!font.charToGlyph(ch).unicode) continue;
+  const b = font.getPath(ch, 0, shared.y, sizeFor(ch)).getBoundingBox();
+  maxY2 = Math.max(maxY2, b.y2);
+  minY1 = Math.min(minY1, b.y1);
 }
 
-const outPath = new URL("../src/lib/letterMetrics.json", import.meta.url);
-fs.writeFileSync(outPath, `${JSON.stringify({ shared, x }, null, 2)}\n`, "utf8");
-
-console.log(`Wrote metrics for ${Object.keys(x).length} characters`);
-console.log(`Shared placement: y=${shared.y}, fontSize=${shared.fontSize}`);
+fs.writeFileSync(
+  new URL("../src/lib/letterMetrics.json", import.meta.url),
+  `${JSON.stringify({ shared }, null, 2)}\n`
+);
+console.log(
+  `metrics: y=${shared.y}, cap=${fontSizeCap}, x=${fontSizeX}, ` +
+    `guides ${shared.guideTop}/${shared.guideUpper}/${shared.guideLower}/${shared.guideBottom}, ` +
+    `yRange=${minY1.toFixed(1)}..${maxY2.toFixed(1)}`
+);

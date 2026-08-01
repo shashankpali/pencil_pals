@@ -1,41 +1,26 @@
 const ITEMS = 8;
 
-/** Rows 1–3 translucent ink; row 4 first cell continues from row 3’s last. */
-const TRACE_OPACITY = 0.45;
-
-/** Rows 4–10: TRACE_OPACITY → 0; each later row drops the leading step. */
-const FADE_LADDER = Array.from({ length: ITEMS }, (_, i) =>
-  +((TRACE_OPACITY * (1 - i / (ITEMS - 1))).toFixed(2))
-);
-
 const ROW_DEFS = [
   { id: "practice-1", heightMm: 18, items: 6, solid: 2, dotted: 4 },
   { id: "practice-2", heightMm: 16, items: 7, solid: 1, dotted: 6 },
   { id: "practice-3", heightMm: 15, items: ITEMS, dotted: ITEMS },
-  ...Array.from({ length: 7 }, (_, fadeFrom) => ({
-    id: `practice-${fadeFrom + 4}`,
+  /** Rows 4–10: full dotted row, then one fewer dotted each row. */
+  ...Array.from({ length: 7 }, (_, i) => ({
+    id: `practice-${i + 4}`,
     heightMm: 15,
     items: ITEMS,
-    fadeFrom
+    dotted: ITEMS - i
   }))
 ];
 
-function slot(kind, opacity) {
-  return opacity == null ? { kind } : { kind, opacity };
+function slot(kind) {
+  return { kind };
 }
 
-function practicePattern({ items, solid = 0, dotted = 0, fadeFrom }) {
-  if (fadeFrom != null) {
-    const opacities = FADE_LADDER.slice(fadeFrom);
-    return [
-      ...opacities.map((opacity) => slot("dotted", opacity)),
-      ...Array.from({ length: items - opacities.length }, () => slot("blank"))
-    ];
-  }
-
+function practicePattern({ items, solid = 0, dotted = 0 }) {
   return [
-    ...Array.from({ length: solid }, () => slot("solid", 1)),
-    ...Array.from({ length: dotted }, () => slot("dotted", TRACE_OPACITY)),
+    ...Array.from({ length: solid }, () => slot("solid")),
+    ...Array.from({ length: dotted }, () => slot("dotted")),
     ...Array.from({ length: items - solid - dotted }, () => slot("blank"))
   ];
 }
