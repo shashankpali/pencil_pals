@@ -1,60 +1,80 @@
 import { parse as parseFont } from "opentype.js/dist/opentype.mjs";
 
-import { HERO_ARROW_FONT, PRACTICE_FONT } from "./fonts.js";
+import { dottedFontFor, fontFor } from "./fonts.js";
 import metrics from "./letterMetrics.json" with { type: "json" };
 
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-const DEFAULT_PLACEMENT = { x: 50, y: metrics.shared?.y ?? 92, fontSize: metrics.shared?.fontSize ?? 84 };
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const VIEW = 100;
+const { shared } = metrics;
+const cache = new Map();
 
-let practiceFontPromise;
-let heroArrowFontPromise;
-
-function fontUrl(relativePath) {
-  return `${BASE_PATH}/${relativePath}`;
-}
-
-async function fetchFont(relativePath, required) {
-  const response = await fetch(fontUrl(relativePath));
-
-  if (!response.ok) {
-    if (!required) return null;
-    throw new Error(`Failed to load font (${response.status}): ${relativePath}`);
+function loadFont(path) {
+  if (!cache.has(path)) {
+    cache.set(
+      path,
+      fetch(`${BASE}/${path}`).then(async (res) => {
+        if (!res.ok) throw new Error(`Font ${res.status}: ${path}`);
+        return parseFont(await res.arrayBuffer());
+      })
+    );
   }
-
-  return parseFont(await response.arrayBuffer());
+  return cache.get(path);
 }
 
-function loadPracticeFont() {
-  if (!practiceFontPromise) {
-    practiceFontPromise = fetchFont(PRACTICE_FONT, true);
+/** Serialize path commands without opentype's toPathData (NaN on some dotted glyphs). */
+function toSvgPath(path, decimals = 2) {
+  const r = (n) => {
+    const v = Number(n);
+    return Number.isFinite(v) ? +v.toFixed(decimals) : 0;
+  };
+  let d = "";
+  for (const c of path.commands) {
+    switch (c.type) {
+      case "M":
+        d += `M${r(c.x)} ${r(c.y)}`;
+        break;
+      case "L":
+        d += `L${r(c.x)} ${r(c.y)}`;
+        break;
+      case "C":
+        d += `C${r(c.x1)} ${r(c.y1)} ${r(c.x2)} ${r(c.y2)} ${r(c.x)} ${r(c.y)}`;
+        break;
+      case "Q":
+        d += `Q${r(c.x1)} ${r(c.y1)} ${r(c.x)} ${r(c.y)}`;
+        break;
+      case "Z":
+        d += "Z";
+        break;
+      default:
+        break;
+    }
   }
-  return practiceFontPromise;
+  return d;
 }
 
-function loadHeroArrowFont() {
-  if (!heroArrowFontPromise) {
-    heroArrowFontPromise = fetchFont(HERO_ARROW_FONT, false).catch(() => null);
-  }
-  return heroArrowFontPromise;
+/** Font size: caps/digits fill top→baseline; lowercase body fills upper→baseline. */
+function fontSizeFor(char) {
+  if (char >= "a" && char <= "z") return shared?.fontSizeX ?? shared?.fontSize ?? 84;
+  return shared?.fontSizeCap ?? shared?.fontSize ?? 84;
 }
 
-function getPlacement(char) {
-  const x = metrics.x?.[char];
-  if (x == null) return DEFAULT_PLACEMENT;
-  return { x, y: metrics.shared.y, fontSize: metrics.shared.fontSize };
-}
-
-function toPathData(font, char, placement) {
-  return font.getPath(char, placement.x, placement.y, placement.fontSize).toPathData(2);
+/** Center glyph in the 100×100 practice viewBox. */
+function pathData(font, char) {
+  const y = shared?.y ?? 92;
+  const fontSize = fontSizeFor(char);
+  const { x1, x2 } = font.getPath(char, 0, y, fontSize).getBoundingBox();
+  const w = x2 - x1;
+  const x = w ? (VIEW - w) / 2 - x1 : 50;
+  return toSvgPath(font.getPath(char, x, y, fontSize));
 }
 
 export async function loadWorksheetPaths(char) {
-  const [practiceFont, arrowFont] = await Promise.all([loadPracticeFont(), loadHeroArrowFont()]);
-  const placement = getPlacement(char);
-  const letter = toPathData(practiceFont, char, placement);
-
+  const [solid, dotted] = await Promise.all([
+    loadFont(fontFor(char)),
+    loadFont(dottedFontFor(char))
+  ]);
   return {
-    hero: arrowFont ? toPathData(arrowFont, char, placement) : letter,
-    letter
+    letter: pathData(solid, char),
+    dotted: pathData(dotted, char)
   };
 }

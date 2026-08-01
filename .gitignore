@@ -26,3 +26,6 @@ Thumbs.db
 # Misc
 *.tsbuildinfo
 .vercel
+
+# Local font rebuild (generated OTF is kept in public/fonts/)
+scripts/build-primer-dotted.py

@@ -60,7 +60,9 @@ function renderWorksheetHtml(spec) {
     <style>
       @page { size: A4; margin: 0; }
       * { box-sizing: border-box; }
-      body { margin: 0; font-family: Arial, sans-serif; color: #1f2937; background: white; }
+      @font-face { font-family: "Sassoon Primary"; src: url("fonts/sassoon-primary-regular.otf") format("opentype"); }
+      @font-face { font-family: "Primer Print"; src: url("fonts/primer-print.otf") format("opentype"); unicode-range: U+0030-0039; }
+      body { margin: 0; font-family: "Primer Print", "Sassoon Primary", "Segoe UI", sans-serif; color: #1f2937; background: white; }
       .page { width: 210mm; min-height: 297mm; padding: ${spec.page.marginMm}mm; }
       .header { display: grid; grid-template-columns: 1.6fr 1fr; gap: 8mm; margin-bottom: 8mm; }
       .hero { border: 1px solid #d1d5db; border-radius: 6mm; padding: 6mm; min-height: 48mm; }

@@ -1,5 +1,10 @@
-/** Local practice font (CF Second Son School — personal use). */
-export const PRACTICE_FONT = "fonts/second-son-school.ttf";
+export const LETTER_FONT = "fonts/sassoon-primary-regular.otf";
+export const DIGIT_FONT = "fonts/primer-print.otf";
+/** Sassoon Infant Dotted — trace cells for letters (do not regenerate). */
+export const LETTER_DOTTED_FONT = "fonts/sassoon-primary-dotted.otf";
+/** Primer Print Dotted — trace cells for digits (generated). */
+export const DIGIT_DOTTED_FONT = "fonts/primer-print-dotted.otf";
 
-/** Optional custom hero font with stroke arrows. */
-export const HERO_ARROW_FONT = "fonts/hero-arrows.woff";
+export const isDigit = (ch) => ch >= "0" && ch <= "9";
+export const fontFor = (ch) => (isDigit(ch) ? DIGIT_FONT : LETTER_FONT);
+export const dottedFontFor = (ch) => (isDigit(ch) ? DIGIT_DOTTED_FONT : LETTER_DOTTED_FONT);

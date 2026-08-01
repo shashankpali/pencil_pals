@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { parseWorksheetSearchParams, worksheetBackParams } from "@/lib/params.js";
+import metrics from "@/lib/letterMetrics.json";
 import { loadWorksheetPaths } from "@/lib/renderLetterPath.js";
 import { buildWorksheetBatch } from "@/lib/worksheets.js";
 import { GuideLines } from "../ui/GuideLines.js";
@@ -12,16 +13,20 @@ import { HeroLetter } from "../ui/HeroLetter.js";
 import { LetterGlyph } from "../ui/LetterGlyph.js";
 import { PrintButton } from "../ui/PrintButton.js";
 
-function Slot({ kind, opacity, letter }) {
+const guideStyle = {
+  "--guide-top": `${metrics.shared.guideTop}%`,
+  "--guide-upper": `${metrics.shared.guideUpper}%`,
+  "--guide-lower": `${metrics.shared.guideLower}%`,
+  "--guide-bottom": `${metrics.shared.guideBottom}%`
+};
+
+function Slot({ kind, letter, dotted }) {
+  const path =
+    kind === "blank" ? null : kind === "dotted" ? dotted : letter;
   return (
     <div className={`practice-cell ${kind}`}>
       <div className="practice-letter-frame">
-        <GuideLines />
-        <LetterGlyph
-          pathData={kind === "blank" ? null : letter}
-          preserveAspectRatio="none"
-          style={opacity == null ? undefined : { opacity }}
-        />
+        <LetterGlyph pathData={path} preserveAspectRatio="none" />
       </div>
     </div>
   );
@@ -29,10 +34,10 @@ function Slot({ kind, opacity, letter }) {
 
 function WorksheetPage({ spec, paths }) {
   return (
-    <article className="worksheet-page">
+    <article className="worksheet-page" style={guideStyle}>
       <header className="worksheet-header">
         <section className="hero-panel">
-          <HeroLetter pathData={paths.hero} />
+          <HeroLetter pathData={paths.letter} />
           <div className="hero-copy">
             <strong>{spec.heroTitle}</strong>
             <span>{spec.heroSubtitle}</span>
@@ -55,12 +60,15 @@ function WorksheetPage({ spec, paths }) {
               height: `${row.heightMm}mm`
             }}
           >
+            <div className="worksheet-row-guides">
+              <GuideLines />
+            </div>
             {row.pattern.map((cell, index) => (
               <Slot
                 key={`${row.id}-${cell.kind}-${index}`}
                 kind={cell.kind}
-                opacity={cell.opacity}
                 letter={paths.letter}
+                dotted={paths.dotted}
               />
             ))}
           </div>
